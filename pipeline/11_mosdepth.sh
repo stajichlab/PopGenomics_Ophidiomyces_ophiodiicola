@@ -8,12 +8,13 @@ if [ ! $CPU ]; then
  CPU=2
 fi
 module load mosdepth
-mkdir -p coverage/mosdepth
+mkdir -p coverage/mosdepth coverage/mosdepth_total
 source config.txt
 
 for WINDOW in 5000 10000 50000
 do
-	parallel --jobs $CPU mosdepth -f $REFGENOME -T 1,10,50,100,200 -n --by $WINDOW -t 2 "{= s:$ALNFOLDER\/:coverage/mosdepth/:; s:\.$HTCEXT:.${WINDOW}bp: =}" {} ::: $ALNFOLDER/*.$HTCEXT
+	parallel --jobs $CPU mosdepth -f $REFGENOME -T 1,10,50,100,200 -n --by $WINDOW -t 2 "{= s:$ALNFOLDER\/:coverage/mosdepth/:; s:\.$HTCEXT:.${WINDOW}bp: =}" {} ::: $(ls $ALNFOLDER/*.$HTCEXT)
+	parallel -j $CPU mosdepth -f $REFGENOME -n -t 2 "{= s:$ALNFOLDER\/:coverage/mosdepth_total/:; s:\.$HTCEXT:: =}" {} ::: $(ls $ALNFOLDER/*.$HTCEXT)
 done
 
 mkdir -p plots
